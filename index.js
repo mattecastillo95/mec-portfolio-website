@@ -1,58 +1,114 @@
-const themeToggle = document.querySelector('.theme-toggle');
-const themeIcon = document.querySelector('.theme-icon');
-const themeLabel = document.querySelector('.theme-label');
-const contactForm = document.querySelector('#contact-form');
-const contactSubmit = document.querySelector('#contact-submit');
-const formStatus = document.querySelector('#form-status');
+const themeToggle = document.querySelector(".theme-toggle");
+const themeIcon = document.querySelector(".theme-icon");
+const themeLabel = document.querySelector(".theme-label");
+const contactForm = document.querySelector("#contact-form");
+const contactSubmit = document.querySelector("#contact-submit");
+const formStatus = document.querySelector("#form-status");
 
 function applyTheme(theme) {
-  const isDark = theme === 'dark';
-  document.body.classList.toggle('dark-theme', isDark);
-  themeToggle?.setAttribute('aria-pressed', String(isDark));
-  themeToggle?.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
-  if (themeIcon) themeIcon.textContent = isDark ? '☼' : '◐';
-  if (themeLabel) themeLabel.textContent = isDark ? 'Light mode' : 'Dark mode';
-  const logo = document.querySelector('.brand img');
-  if (logo) logo.src = isDark ? './assets/mc-monogram-white-red.svg' : './assets/mc-monogram.svg';
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#101010' : '#f7f5f2');
+  const isDark = theme === "dark";
+  document.body.classList.toggle("dark-theme", isDark);
+  themeToggle?.setAttribute("aria-pressed", String(isDark));
+  themeToggle?.setAttribute(
+    "aria-label",
+    isDark ? "Switch to light mode" : "Switch to dark mode",
+  );
+  if (themeIcon) themeIcon.textContent = isDark ? "☼" : "◐";
+  if (themeLabel) themeLabel.textContent = isDark ? "Light mode" : "Dark mode";
+  const logo = document.querySelector(".brand img");
+  if (logo)
+    logo.src = isDark
+      ? "./assets/mc-monogram-white-red.svg"
+      : "./assets/mc-monogram.svg";
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", isDark ? "#101010" : "#f7f5f2");
 }
 
-const savedTheme = localStorage.getItem('mc-theme');
-const preferredDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-applyTheme(savedTheme || (preferredDark ? 'dark' : 'light'));
+const savedTheme = localStorage.getItem("mc-theme");
+const preferredDark = window.matchMedia?.(
+  "(prefers-color-scheme: dark)",
+).matches;
+applyTheme(savedTheme || (preferredDark ? "dark" : "light"));
 
-themeToggle?.addEventListener('click', () => {
-  const nextTheme = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
+themeToggle?.addEventListener("click", () => {
+  const nextTheme = document.body.classList.contains("dark-theme")
+    ? "light"
+    : "dark";
   applyTheme(nextTheme);
-  localStorage.setItem('mc-theme', nextTheme);
+  localStorage.setItem("mc-theme", nextTheme);
 });
 
-document.querySelector('#year').textContent = new Date().getFullYear();
+document.querySelector("#year").textContent = new Date().getFullYear();
 
-contactForm?.addEventListener('submit', async (event) => {
+contactForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!window.emailjs) {
-    formStatus.textContent = 'The message service is unavailable right now. Please email me directly.';
-    formStatus.className = 'form-status is-error';
+    formStatus.textContent =
+      "The message service is unavailable right now. Please email me directly.";
+    formStatus.className = "form-status is-error";
     return;
   }
 
   contactSubmit.disabled = true;
   contactSubmit.innerHTML = 'Sending… <span aria-hidden="true">↗</span>';
-  formStatus.textContent = 'Sending your message…';
-  formStatus.className = 'form-status';
+  formStatus.textContent = "Sending your message…";
+  formStatus.className = "form-status";
 
   try {
-    await emailjs.sendForm('service_vwhpitf', 'template_5s5s1sy', contactForm, 'Dn5p2yQQm0zeCxcGd');
-    formStatus.textContent = 'Thanks — your message has been sent. I look forward to speaking with you!';
-    formStatus.className = 'form-status is-success';
+    await emailjs.sendForm(
+      "service_vwhpitf",
+      "template_5s5s1sy",
+      contactForm,
+      "Dn5p2yQQm0zeCxcGd",
+    );
+    formStatus.textContent =
+      "Thanks — your message has been sent. I look forward to speaking with you!";
+    formStatus.className = "form-status is-success";
     contactForm.reset();
   } catch (error) {
-    console.error('EmailJS error:', error);
-    formStatus.textContent = 'Sorry, your message could not be sent. Please email mattecastillo95@gmail.com instead.';
-    formStatus.className = 'form-status is-error';
+    console.error("EmailJS error:", error);
+    formStatus.textContent =
+      "Sorry, your message could not be sent. Please email mattecastillo95@gmail.com instead.";
+    formStatus.className = "form-status is-error";
   } finally {
     contactSubmit.disabled = false;
     contactSubmit.innerHTML = 'Send message <span aria-hidden="true">↗</span>';
   }
 });
+
+/* =========================================
+   REDLINE — INTERACTIVE HERO ART
+========================================= */
+
+const heroArt = document.querySelector(".hero-art");
+
+if (
+  heroArt &&
+  window.matchMedia("(pointer: fine)").matches &&
+  !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+) {
+  let animationFrame;
+
+  heroArt.addEventListener("pointermove", (event) => {
+    const rect = heroArt.getBoundingClientRect();
+
+    // Normalize cursor position between -1 and 1
+    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+
+    cancelAnimationFrame(animationFrame);
+
+    animationFrame = requestAnimationFrame(() => {
+      heroArt.style.setProperty("--mouse-x", x.toFixed(3));
+      heroArt.style.setProperty("--mouse-y", y.toFixed(3));
+    });
+  });
+
+  heroArt.addEventListener("pointerleave", () => {
+    cancelAnimationFrame(animationFrame);
+
+    heroArt.style.setProperty("--mouse-x", "0");
+    heroArt.style.setProperty("--mouse-y", "0");
+  });
+}
